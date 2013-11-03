@@ -1,0 +1,47 @@
+This repository contains the code to recreate my top-scoring
+submission to the Kaggle StumbleUpon Evergreen Classification
+Challenge [1]. This submission scored 0.87777 (Rank #300) on 
+the public leaderboard and 0.88764 on the private leaderboard 
+(Rank #4).
+
+My original submission was inspired by Abhishek's "Beating the Benchmark" 
+post on the competition forum [2]. I found it quite interesting 
+that such a simple solution was proving so difficult for many people
+to beat, and that prompted me to start investigating if there was any
+possibility to do better. The approach I took has previously been 
+described as "overkill analytics" [3] - the plan of action was simply
+to generate as many derivative features as possible from each webpage,
+and then use machine learning to establish the best weights for them
+via the training data. 
+
+Feature extraction is implemented in `raw2tsv.py`, and this was used to 
+generate features in a TSV format. I generated three broad classes of
+features: (1) text-based, where each feature is a string, (2) count-based,
+where occurrances of particular items were counted, and (3) length-based,
+where the lengths of particular fields were counted. In the end, based on
+my internal cross-validation results, I only utilized the text-based 
+features for the submission. Feature extraction relied heavily on parsing
+the HTML of the document, and extracting the content of various nodes.
+`raw2tsv.py` was written to be re-usable as a general profiler for HTML
+documents.
+
+`SEP09b.textstacking.py` implements the actual classifier. I used
+Abhishek's code as a starting point, and that can be recognized in the
+choice of some parameters as well as some of the general structure, but
+I have also modified the code substantially. The biggest change is probably
+the implementation of a stacking-based approach to combining the features
+I generated. Details of this approach can be found in a paper I wrote in
+2012 [4], where I applied it to a different task. The gist is simple - 
+generate "features", which are chunks of text - for example, the title of
+the document, the body of the document, etc. For each feature, construct
+the bag-of-words and use that to train a logistic regression classifier,
+then use another logistic regression unit to combine the predictions of
+each individual classifier.
+
+Marco Lui <saffsd@gmail.com>,
+November 2013
+
+[1] http://www.kaggle.com/c/stumbleupon
+[2] http://www.kaggle.com/c/stumbleupon/forums/t/5680/beating-the-benchmark-leaderboard-auc-0-878
+[3] http://www.overkillanalytics.net/
+[4] http://aclweb.org/anthology-new/U/U12/U12-1019.pdf
